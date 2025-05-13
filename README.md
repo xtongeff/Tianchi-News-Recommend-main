@@ -26,9 +26,5 @@ https://tianchi.aliyun.com/competition/entrance/531842/information
     - 排序模型：LGBMRanker
     - 训练数据：赛事提供的train_click_log和testA_click_log的前N-1次点击（由于testA中有部分用户只点击了一次，所以开始处理时已经去除。），其中80%为训练集，10%为模型使用的eval_set，/
         10%为线下验证集，数据的最后一次点击作为预测目标。（80%是所有点击数据，不是用户数量，所以用户数量可能会有所不同）
-    - 线下召回率
-        ItemCF RECALL:  41.09988356620093%
-        Hot RECALL:     26.32152361942781%
-        Total RECALL:   49.384980039920165%
     - 线下MRR
-        0.3167055542146056（有波动）
+        0.23
