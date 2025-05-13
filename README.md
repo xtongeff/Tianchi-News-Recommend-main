@@ -3,14 +3,15 @@
 # 数据来源
 https://tianchi.aliyun.com/competition/entrance/531842/information
 
-# code文件夹（最终效果较好的召回排序算法）
+# code文件夹
+## 最终效果较好的召回排序算法
 包含了召回、特征工程、排序的最终代码，使用ItemCF，基于网络关系的召回和Word2Vec 向量召回，合并召回结果后Hit Rate达到0.367，MRR达到0.220。
 进行特征工程，创建了新闻特征，用户特征，用户-新闻交互特征共30项。
 使用LightGBM进行排序，并进行五折交叉验证，排序后指标Hit Rate达到0.441，MRR达到0.265。
 完整记录见code/log/log.dox
 
 # 一些尝试
-# main.py
+## main.py
 ### 召回
     用了两种召回策略，分别是基于新闻相似度的协同过滤召回和基于新闻热度的召回。
     - 基于新闻相似度的协同过滤（25篇）
@@ -27,4 +28,23 @@ https://tianchi.aliyun.com/competition/entrance/531842/information
     - 训练数据：赛事提供的train_click_log和testA_click_log的前N-1次点击（由于testA中有部分用户只点击了一次，所以开始处理时已经去除。），其中80%为训练集，10%为模型使用的eval_set，/
         10%为线下验证集，数据的最后一次点击作为预测目标。（80%是所有点击数据，不是用户数量，所以用户数量可能会有所不同）
     - 线下MRR
-        0.23
+        0.233
+
+# 学习基础的召回、特征工程、排序方法
+## baseline.py  
+为了测试代码的最终生成格式，只使用itemcf召回，然后进行用户热度补全，提交文件。最终MRR只有0.102。
+
+## data_analyse.py
+分析数据
+
+## retrival.py和retrival_new.py
+尝试多种召回方式的融合
+
+## feature.py
+特征工程
+
+## sort.py
+尝试多种排序方式的融合
+
+## read.py
+读取生成的文件，查看文件格式。
