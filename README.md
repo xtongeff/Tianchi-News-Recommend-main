@@ -194,5 +194,6 @@ https://tianchi.aliyun.com/competition/entrance/531842/information
         实现了两种模型融合方法：
         加权融合：不同模型的输出结果加权平均
         Stacking：将多个模型的预测结果作为特征，再训练一个模型
+    但是最终效果不好，经过召回、特征工程和排序后，提交结果MRR仅有0.0922，甚至没有baseline的效果好。
 ## read.py
 读取生成的文件，查看文件格式。
