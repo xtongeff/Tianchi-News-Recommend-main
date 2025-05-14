@@ -20,6 +20,7 @@ https://tianchi.aliyun.com/competition/entrance/531842/information
         o 构成：由训练集df_train_click和测试集df_test_click合并而成。先将两个数据集按行拼接（pd.concat），然后重置索引，再按照user_id和click_timestamp进行排序，最后再次重置索引。
     df_query：
         o 构成：完全由测试集用户相关数据生成。针对测试集df_test_click中的每个唯一用户user_id，创建一条记录，其中click_article_id固定设置为-1 ，并将这些记录整理成DataFrame。
+    
     2.召回（计算相似度，训练word2vec时用df_click,召回时用df_query）
     o 基于 itemcf 召回：计算新闻相似度时，综合考虑新闻共现次数和点击次序关系，位置越远相关性越小。建立相似度关系后，结合相似度和位置距离衰减选择 TOP100 关联新闻，同时添加 label 作为监督学习数据，召回数据按要求排序，该方法有一定召回效果。
     第一阶段：
@@ -47,19 +48,19 @@ https://tianchi.aliyun.com/competition/entrance/531842/information
     | | hitrate_5 | mrr_5 |
     | 合并 | 0.3667842416414129 | 0.2196640005299097 |
     新闻特征包括：
-    •	新闻类型
-    •	新闻创建时间
-    •	新闻字数
+    • 新闻类型
+    • 新闻创建时间
+    • 新闻字数
     用户特征包括：
-    •	用户点击新闻的创建时间差的平均值
-    •	用户点击新闻的点击时间差的平均值
-    •	用户点击新闻的点击-创建时间差的统计值：mean，std
-    •	用户点击新闻的 click_datetime_hour 统计值
-    •	用户点击新闻的字数统计值
-    •	用户点击新闻的创建时间统计值
-    •	用户点击新闻的点击时间统计值
-    •	用户新闻阅读数量
-    •	用户某种类新闻阅读数量
+    • 用户点击新闻的创建时间差的平均值
+    • 用户点击新闻的点击时间差的平均值
+    • 用户点击新闻的点击-创建时间差的统计值：mean，std
+    • 用户点击新闻的 click_datetime_hour 统计值
+    • 用户点击新闻的字数统计值
+    • 用户点击新闻的创建时间统计值
+    • 用户点击新闻的点击时间统计值
+    • 用户新闻阅读数量
+    • 用户某种类新闻阅读数量
     交互特征主要基于之前的召回策略进行，通过保存召回阶段的新闻相似度信息或向量，我们能够间接或直接得到用户对待预测新闻的评分。基于 itemcf， 网络关系和 w2v 的召回得到的只是新闻之间的相似度，需要和用户的历史点击新闻计算间接得到用户-新闻评分，采用如下方式：
     •	待预测新闻和用户所有历史点击新闻相似度按次序加权求和
     •	待预测新闻和用户最近一次点击新闻相似度
@@ -113,13 +114,85 @@ https://tianchi.aliyun.com/competition/entrance/531842/information
         连续点击的新闻间存在一定的相关性
 
 ## retrival.py和retrival_new.py
-尝试多种召回方式的融合
-
+    数据处理功能：
+        提供了三种数据读取模式：Debug模式（小样本调试）、线下验证模式和线上模式
+        实现了文章基本信息和embedding数据的读取和预处理
+        包含了时间戳归一化等数据预处理功能
+    基础工具函数：
+        get_user_item_time(): 获取用户-文章-时间的映射关系
+        get_item_user_time_dict(): 获取文章-用户-时间的映射关系
+        get_hist_and_last_click(): 获取用户的历史点击和最后一次点击信息
+        get_item_info_dict(): 获取文章属性特征字典
+        get_user_hist_item_info_dict(): 获取用户历史点击文章信息
+    多种召回策略实现：
+        基于物品的协同过滤（ItemCF）：itemcf_sim()
+        基于用户的协同过滤（UserCF）：usercf_sim()
+        基于embedding的相似度召回：embdding_sim()
+        YouTube DNN模型召回：youtubednn_u2i_dict()
+        基于物品的推荐：item_based_recommend()
+        基于用户的推荐：user_based_recommend()
+    冷启动处理：
+        cold_start_items(): 处理新用户或新文章的冷启动问题
+        基于文章属性（类型、字数、创建时间等）进行推荐
+    召回结果处理：
+        combine_recall_results(): 合并多种召回策略的结果
+        metrics_recall(): 评估召回结果的效果
 ## feature.py
-特征工程
+    数据预处理功能：
+        reduce_mem(): 优化数据内存占用的函数，通过调整数据类型来减少内存使用
+        trn_val_split(): 将数据集划分为训练集和验证集
+        get_hist_and_last_click(): 获取用户的历史点击和最后一次点击信息
+        get_trn_val_tst_data(): 读取训练、验证和测试数据集
+    Embedding相关功能：
+        trian_item_word2vec(): 训练文章的Word2Vec嵌入向量
+        get_embedding(): 获取各种类型的嵌入向量（内容嵌入、Word2Vec嵌入、YouTube嵌入等）
+    特征生成功能：
+        create_feature(): 创建特征，包括用户特征、物品特征和交互特征
+        active_level(): 计算活跃度相关特征
+        hot_level(): 计算热度相关特征
+        device_fea(): 生成设备相关特征
+        user_time_hob_fea(): 生成用户时间习惯特征
+        user_cat_hob_fea(): 生成用户类别兴趣特征
+    标签处理功能：
+        get_rank_label_df(): 获取排序标签数据
+        neg_sample_recall_data(): 负采样，用于生成训练数据
+        get_user_recall_item_label_df(): 获取用户-物品-标签数据
+    召回数据处理：
+        get_recall_list(): 读取召回列表（支持单路召回和多路召回）
+        recall_dict_2_df(): 将召回字典转换为DataFrame格式
+    主要特征类型包括：
+        用户特征：
+            活跃度特征
+            时间习惯特征
+            类别兴趣特征
+            设备使用特征
+        文章特征：
+            内容特征
+            热度特征
+            各种嵌入向量
+        交互特征：
+            用户-文章交互特征
+            时序特征
+            统计特征
 
 ## sort.py
-尝试多种排序方式的融合
-
+    排序模型实现：
+        主要包含三种排序模型：
+            LGB排序模型（LGBMRanker）：使用LightGBM的排序模型
+            LGB分类模型
+            DIN（Deep Interest Network）深度学习分类模型
+    模型训练与验证：
+        实现了五折交叉验证
+        使用NDCG作为评估指标
+        支持早停策略
+        提供了离线验证和在线预测两种模式
+    结果处理功能：
+        submit()：生成最终的提交结果
+        norm_sim()：对排序结果进行归一化处理
+        get_kfold_users()：实现用户级别的K折交叉验证
+    模型融合策略：
+        实现了两种模型融合方法：
+        加权融合：不同模型的输出结果加权平均
+        Stacking：将多个模型的预测结果作为特征，再训练一个模型
 ## read.py
 读取生成的文件，查看文件格式。
