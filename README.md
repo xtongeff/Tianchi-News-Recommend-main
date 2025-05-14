@@ -5,10 +5,10 @@ https://tianchi.aliyun.com/competition/entrance/531842/information
 
 # code文件夹
 ## 最终效果较好的召回排序算法
-包含了召回、特征工程、排序的最终代码，使用ItemCF，基于网络关系的召回和Word2Vec 向量召回，合并召回结果后Hit Rate达到0.367，MRR达到0.220。
-进行特征工程，创建了新闻特征，用户特征，用户-新闻交互特征共30项。
-使用LightGBM进行排序，并进行五折交叉验证，排序后指标Hit Rate达到0.441，MRR达到0.265。
-完整记录见code/log/log.dox
+    包含了召回、特征工程、排序的最终代码，使用ItemCF，基于网络关系的召回和Word2Vec 向量召回，合并召回结果后Hit Rate达到0.367，MRR达到0.220。
+    进行特征工程，创建了新闻特征，用户特征，用户-新闻交互特征共30项。
+    使用LightGBM进行排序，并进行五折交叉验证，排序后指标Hit Rate达到0.441，MRR达到0.265。
+    完整记录见code/log/log.dox
 
 # 一些尝试
 ## main.py
